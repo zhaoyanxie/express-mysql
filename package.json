@@ -1,0 +1,21 @@
+{
+  "name": "express-mysql",
+  "version": "1.0.0",
+  "main": "server.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "jest": "^23.6.0",
+    "mysql": "^2.16.0"
+  }
+}
