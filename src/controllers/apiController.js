@@ -1,6 +1,10 @@
 const database = require("../database");
 
-const { TABLE_STUDENTS, TABLE_TEACHERS } = require("../constants");
+const {
+  TABLE_STUDENTS,
+  TABLE_TEACHERS,
+  STUDENTS_COL_TEACHERS_ID
+} = require("../constants");
 
 const pool = database.connect();
 
@@ -37,17 +41,13 @@ const students = async (req, res, next) => {
   res.json(results);
 };
 
-// Add a student to the table
-
 // Register a student to a teacher
 const register = async (req, res, next) => {
   const { body } = req;
+  const teacherIndex = await getIndexTeacher(body.teacher);
   const studentsIndexes = [];
-  const allTeachers = await getAllTeachers(); // from db
-  const allStudents = await getAllStudents(); // from db
-
   // Check if teacher exists, exit if doesn't
-  if ((await getIndexTeacher(body.teacher)) < 0) {
+  if (teacherIndex < 0) {
     return res
       .status(400)
       .json({ message: `Teacher ${body.teacher} does not exist.` });
@@ -58,16 +58,29 @@ const register = async (req, res, next) => {
     const indexStudent = await getIndexStudent(studentEmail);
     if (indexStudent < 0) {
       // if student does not exist, add new student
-      const results = await database.insert(pool, TABLE_STUDENTS, studentEmail);
-      console.log("results", results);
-      studentsIndexes.push(-1);
+      const results = await database.insert(
+        pool,
+        TABLE_STUDENTS,
+        studentEmail,
+        teacherIndex
+      );
+      console.log(`Student ${studentEmail} created, ${results.message}`);
     } else {
-      // alter student's related_to property
-      studentsIndexes.push(indexStudent);
+      // update student's teacher_id column
+      const results = await database.update(
+        pool,
+        TABLE_STUDENTS,
+        STUDENTS_COL_TEACHERS_ID,
+        // 12,
+        teacherIndex,
+        "email",
+        studentEmail
+      );
+      console.log(`Student ${studentEmail} updated, ${results.message}`);
     }
   });
 
-  res.json({ message: "register" });
+  res.status(204).json({ message: "registered" });
 };
 // Join students to a common teacher
 const commonStudents = (req, res, next) => {
