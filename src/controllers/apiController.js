@@ -96,8 +96,33 @@ const register = async (req, res, next) => {
   res.status(204).json({ message: "registered" });
 };
 // Join students to a common teacher
-const commonstudents = (req, res, next) => {
-  console.log("here", req.query);
-  res.json({ message: "common" });
+const commonstudents = async (req, res, next) => {
+  let queryTeachers = req.query.teacher;
+  queryTeachers =
+    queryTeachers.constructor === Array ? queryTeachers : [queryTeachers];
+  const allStudents = await getAllStudents();
+  let commonStudents = [];
+  const allQueryTeachersIndex = await Promise.all(
+    queryTeachers.map(async queryTeacher => await getIndexTeacher(queryTeacher))
+  );
+  // Map through each student, find one whose teachers_id contain all indexes of teachers in query
+  allStudents.forEach(student => {
+    if (!student.teachers_id) return;
+    let bFound = true;
+    const teachers_idArr = student.teachers_id
+      .split(",")
+      .map(id => parseInt(id));
+
+    allQueryTeachersIndex.forEach(id =>
+      teachers_idArr.indexOf(id) < 0 ? (bFound = false) : (bFound = true)
+    );
+    if (bFound) {
+      commonStudents.push(
+        ...allStudents.filter(s => s.email === student.email).map(s => s.email)
+      );
+    } //
+  });
+
+  res.status(200).json({ message: commonStudents });
 };
 module.exports = { register, commonstudents, students, teachers };
