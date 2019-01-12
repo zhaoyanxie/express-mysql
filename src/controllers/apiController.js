@@ -132,7 +132,6 @@ const commonstudents = async (req, res, next) => {
 
 const suspend = async (req, res, next) => {
   const studentToSuspend = req.body.student;
-  console.log(studentToSuspend);
   const results = await database.update(
     pool,
     TABLE_STUDENTS,
@@ -143,4 +142,42 @@ const suspend = async (req, res, next) => {
   );
   res.json({ message: "suspend" });
 };
-module.exports = { register, commonstudents, students, suspend, teachers };
+
+const retrievefornotifications = async (req, res, next) => {
+  const { teacher, notification } = req.body;
+  // Criteria 1: must not be suspended
+  const criteria1 = "isSuspended = 0";
+  const queryStr = `SELECT (email), (teachers_id) FROM ${TABLE_STUDENTS} WHERE ${criteria1}`;
+  const studentsNotSuspended = await database.query(pool, queryStr);
+  console.log("results", studentsNotSuspended);
+
+  // Criteria 2: registered with teacher OR mentioned notification
+  // filter out students registered with teacher
+  const teacherIndex = await getIndexTeacher(teacher);
+  const notificationList = studentsNotSuspended
+    .filter(student => {
+      const teachers_id = student.teachers_id || "";
+      const teachers_idArr = teachers_id.split(",").map(id => parseInt(id));
+      return teachers_idArr.indexOf(teacherIndex) >= 0;
+    })
+    .map(student => student.email);
+
+  // add to to notification list those mentioned
+  const mentionedStudents = notification
+    .match(/(?=[\ @])[^\s]+/g)
+    .map(string => string.substr(1));
+  mentionedStudents.forEach(mentionedStudent => {
+    if (notificationList.indexOf(mentionedStudent) < 0) {
+      notificationList.push(mentionedStudent);
+    }
+  });
+  res.status(200).json({ recipients: notificationList });
+};
+module.exports = {
+  register,
+  commonstudents,
+  students,
+  suspend,
+  teachers,
+  retrievefornotifications
+};
