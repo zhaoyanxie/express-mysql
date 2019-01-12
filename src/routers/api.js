@@ -13,6 +13,8 @@ router.get("/students", apiController.students);
 router.post("/register", apiController.register);
 // GET: common students to array of teachers
 router.get("/commonstudents", apiController.commonstudents);
+// POST: suspend student
+router.post("/suspend", apiController.suspend);
 
 module.exports = app => {
   app.use("/api", router);

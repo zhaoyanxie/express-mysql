@@ -125,4 +125,18 @@ const commonstudents = async (req, res, next) => {
 
   res.status(200).json({ message: commonStudents });
 };
-module.exports = { register, commonstudents, students, teachers };
+
+const suspend = async (req, res, next) => {
+  const studentToSuspend = req.body.student;
+  console.log(studentToSuspend);
+  const results = await database.update(
+    pool,
+    TABLE_STUDENTS,
+    "isSuspended",
+    1,
+    "email",
+    studentToSuspend
+  );
+  res.json({ message: "suspend" });
+};
+module.exports = { register, commonstudents, students, suspend, teachers };
