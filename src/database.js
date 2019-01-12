@@ -21,11 +21,10 @@ const database = {
     });
     return pool;
   },
-  insert: async (pool, table, email) => {
+  insert: async (pool, table, email, teachers_id) => {
     try {
-      console.log("here", `INSERT INTO ${table} (email) VALUES ('${email}')`);
       return await pool.query(
-        `INSERT INTO ${table} (email) VALUES ('${email}')`
+        `INSERT INTO ${table} (email, teachers_id) VALUES ('${email}', ${teachers_id})`
       );
     } catch (error) {
       throw error;
