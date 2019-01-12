@@ -1,6 +1,6 @@
 const MYSQL_SCHEMA = "school";
 const MYSQL_TABLENAME_STUDENTS = "tbl_students";
-const MYSQL_STUDENTS_COL_TEACHERSID = "teacher_id";
+const MYSQL_STUDENTS_COL_TEACHERSID = "teachers_id";
 const MYSQL_TABLENAME_TEACHERS = "tbl_teachers";
 
 module.exports = {

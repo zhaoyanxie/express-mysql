@@ -41,13 +41,17 @@ const students = async (req, res, next) => {
   res.json(results);
 };
 
+// GET teachers_id of a student (Helper)
+const getStudentTeachersId = async studentEmail => {
+  const queryStr = `SELECT teachers_id from ${TABLE_STUDENTS} WHERE email = '${studentEmail}'`;
+  return await database.query(pool, queryStr);
+};
 // Register a student to a teacher
 const register = async (req, res, next) => {
   const { body } = req;
-  const teacherIndex = await getIndexTeacher(body.teacher);
-  const studentsIndexes = [];
+  const indexTeacher = await getIndexTeacher(body.teacher); // from db
   // Check if teacher exists, exit if doesn't
-  if (teacherIndex < 0) {
+  if (indexTeacher < 0) {
     return res
       .status(400)
       .json({ message: `Teacher ${body.teacher} does not exist.` });
@@ -62,28 +66,38 @@ const register = async (req, res, next) => {
         pool,
         TABLE_STUDENTS,
         studentEmail,
-        teacherIndex
+        indexTeacher.toString()
       );
       console.log(`Student ${studentEmail} created, ${results.message}`);
     } else {
-      // update student's teacher_id column
-      const results = await database.update(
-        pool,
-        TABLE_STUDENTS,
-        STUDENTS_COL_TEACHERS_ID,
-        // 12,
-        teacherIndex,
-        "email",
-        studentEmail
-      );
-      console.log(`Student ${studentEmail} updated, ${results.message}`);
+      // find student's teacher_id column
+      const queryResults = await getStudentTeachersId(studentEmail);
+      const teachers_id = queryResults[0].teachers_id || [];
+      const teachers_idArr = teachers_id.split(",");
+      // update student's teacher_id column if yet to be registered
+      if (teachers_idArr.indexOf(indexTeacher.toString()) < 0) {
+        const updated_teachers_id = [...teachers_idArr, indexTeacher]
+          .sort()
+          .join(",");
+        const results = await database.update(
+          pool,
+          TABLE_STUDENTS,
+          STUDENTS_COL_TEACHERS_ID,
+          // "1,2",
+          updated_teachers_id,
+          "email",
+          studentEmail
+        );
+        console.log(`Student ${studentEmail} updated, ${results.message}`);
+      }
     }
   });
 
   res.status(204).json({ message: "registered" });
 };
 // Join students to a common teacher
-const commonStudents = (req, res, next) => {
-  const store = database.connect();
+const commonstudents = (req, res, next) => {
+  console.log("here", req.query);
+  res.json({ message: "common" });
 };
-module.exports = { register, commonStudents, students, teachers };
+module.exports = { register, commonstudents, students, teachers };
