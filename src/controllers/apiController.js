@@ -108,14 +108,18 @@ const commonstudents = async (req, res, next) => {
   // Map through each student, find one whose teachers_id contain all indexes of teachers in query
   allStudents.forEach(student => {
     if (!student.teachers_id) return;
-    let bFound = true;
+    let bFound = false;
+    const countFound = [];
     const teachers_idArr = student.teachers_id
       .split(",")
       .map(id => parseInt(id));
 
-    allQueryTeachersIndex.forEach(id =>
-      teachers_idArr.indexOf(id) < 0 ? (bFound = false) : (bFound = true)
-    );
+    allQueryTeachersIndex.forEach(id => {
+      if (teachers_idArr.indexOf(id) >= 0) {
+        countFound.push(true);
+      }
+    });
+    bFound = countFound.length === allQueryTeachersIndex.length ? true : false;
     if (bFound) {
       commonStudents.push(
         ...allStudents.filter(s => s.email === student.email).map(s => s.email)
