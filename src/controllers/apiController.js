@@ -41,7 +41,7 @@ const students = async (req, res, next) => {
   res.json(results);
 };
 
-// GET teachers_id of a student (Helper)
+// GET teachers_id of a student in array? (Helper)
 const getStudentTeachersId = async studentEmail => {
   const queryStr = `SELECT teachers_id from ${TABLE_STUDENTS} WHERE email = '${studentEmail}'`;
   return await database.query(pool, queryStr);
@@ -50,7 +50,7 @@ const getStudentTeachersId = async studentEmail => {
 const register = async (req, res, next) => {
   const { body } = req;
   const indexTeacher = await getTeacherIndex(body.teacher); // from db
-  // Check if teacher exists, exit if doesn't
+  // ERROR-HANDLING: Check if teacher exists, exit if doesn't
   if (indexTeacher < 0) {
     return res
       .status(400)
@@ -72,8 +72,8 @@ const register = async (req, res, next) => {
     } else {
       // find student's teacher_id column
       const queryResults = await getStudentTeachersId(studentEmail);
-      const teachers_id = queryResults[0].teachers_id || [];
-      const teachers_idArr = teachers_id.split(",");
+      const teachers_id = queryResults[0].teachers_id;
+      const teachers_idArr = teachers_id.split(",") || [];
       // update student's teacher_id column if yet to be registered
       if (teachers_idArr.indexOf(indexTeacher.toString()) < 0) {
         const updated_teachers_id = [...teachers_idArr, indexTeacher]
@@ -127,7 +127,7 @@ const commonstudents = async (req, res, next) => {
     } //
   });
 
-  res.status(200).json({ message: commonStudents });
+  res.status(200).json({ students: commonStudents });
 };
 
 const suspend = async (req, res, next) => {
@@ -178,6 +178,7 @@ module.exports = {
   getTeacherIndex,
   getAllStudents,
   getStudentIndex,
+  getStudentTeachersId,
   register,
   commonstudents,
   students,
