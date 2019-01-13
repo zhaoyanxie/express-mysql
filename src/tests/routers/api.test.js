@@ -9,22 +9,28 @@ const app = express();
 
 apiRouter(app);
 describe("api router test", () => {
+  const userDoesNotExist = "doesnotexist@email.com";
+  const studentHon = "studenthon@example.com";
+  const studentJon = "studentjon@example.com";
+  const teacherJim = "teacherjim@email.com";
+  const teacherKen = "teacherken@email.com";
+
   test("POST /api/register to return status 400", async () => {
     const req = {
-      teacher: "doesnotexist@email.com",
-      students: ["studentjon@example.com", "studenthon@example.com"]
+      teacher: userDoesNotExist,
+      students: [studentJon, studentHon]
     };
     const res = await request(app)
       .post("/api/register")
       .send(req);
     expect(res.status).toBe(400);
     expect(res.body.message).toBe(
-      "Teacher doesnotexist@email.com does not exist."
+      `Teacher ${userDoesNotExist} does not exist.`
     );
   });
   test("POST /api/register to register a student (unregistered in database) to return status 204", async () => {
     const req = {
-      teacher: "teacherjim@email.com",
+      teacher: teacherJim,
       students: ["newstudent@email.com", "studentOnlyJim@email.com"]
     };
     const teacherJimIndex = await apiController.getTeacherIndex(req.teacher);
@@ -43,13 +49,11 @@ describe("api router test", () => {
   });
   test("POST /api/register to update a registered student's teachers_id to return status 204", async () => {
     const req = {
-      teacher: "teacherken@email.com",
+      teacher: teacherKen,
       students: ["newstudent@email.com"]
     };
     const teacherKenIndex = await apiController.getTeacherIndex(req.teacher);
-    const teacherJimIndex = await apiController.getTeacherIndex(
-      "teacherjim@email.com"
-    );
+    const teacherJimIndex = await apiController.getTeacherIndex(teacherJim);
     const res = await request(app)
       .post("/api/register")
       .send(req);
@@ -67,7 +71,7 @@ describe("api router test", () => {
   });
   test("GET /api/commonstudents to return 'newstudent@email.com' for Teachers Ken and Jim", async () => {
     const query = {
-      teacher: ["teacherken@email.com", "teacherjim@email.com"]
+      teacher: [teacherKen, teacherJim]
     };
     const res = await request(app)
       .get("/api/commonstudents")
@@ -78,7 +82,7 @@ describe("api router test", () => {
   });
   test("POST /api/suspend to suspend a student and return status 204", async () => {
     const reqRegister = {
-      teacher: "teacherken@email.com",
+      teacher: teacherKen,
       students: ["suspendedstudent@email.com"]
     };
     const reqSuspend = {
@@ -99,20 +103,18 @@ describe("api router test", () => {
   });
   test("POST /api/suspend to suspend a student and return status 400 when student not found", async () => {
     const reqSuspend = {
-      student: "doesnotexist@email.com"
+      student: userDoesNotExist
     };
     const res = await request(app)
       .post("/api/suspend")
       .send(reqSuspend);
 
     expect(res.status).toBe(400);
-    expect(res.body.message).toBe(
-      "Student doesnotexist@email.com does not exist"
-    );
+    expect(res.body.message).toBe(`Student ${userDoesNotExist} does not exist`);
   });
   test("POST /api/retrievefornotifications to return status 400 for teacher does not exist", async () => {
     const req = {
-      teacher: "doesnotexist@email.com",
+      teacher: userDoesNotExist,
       notification:
         "Hello students! @studentagnes@example.com @studentmiche@example.com"
     };
@@ -121,12 +123,12 @@ describe("api router test", () => {
       .send(req);
     expect(res.status).toBe(400);
     expect(res.body.message).toEqual(
-      "Teacher doesnotexist@email.com does not exist."
+      `Teacher ${userDoesNotExist} does not exist.`
     );
   });
   test("POST /api/retrievefornotifications to return list of students for notification", async () => {
     const req = {
-      teacher: "teacherken@email.com",
+      teacher: teacherKen,
       notification:
         "Hello students! @studentagnes@example.com @studentmiche@example.com"
     };
