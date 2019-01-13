@@ -107,4 +107,35 @@ describe("api router test", () => {
       "Student doesnotexist@email.com does not exist"
     );
   });
+  test("POST /api/retrievefornotifications to return status 400 for teacher does not exist", async () => {
+    const req = {
+      teacher: "doesnotexist@email.com",
+      notification:
+        "Hello students! @studentagnes@example.com @studentmiche@example.com"
+    };
+    const res = await request(app)
+      .post("/api/retrievefornotifications")
+      .send(req);
+    expect(res.status).toBe(400);
+    expect(res.body.message).toEqual(
+      "Teacher doesnotexist@email.com does not exist."
+    );
+  });
+  test("POST /api/retrievefornotifications to return list of students for notification", async () => {
+    const req = {
+      teacher: "teacherken@email.com",
+      notification:
+        "Hello students! @studentagnes@example.com @studentmiche@example.com"
+    };
+    const res = await request(app)
+      .post("/api/retrievefornotifications")
+      .send(req);
+    const expectedNotificationList = [
+      "studentagnes@example.com",
+      "newstudent@email.com",
+      "studentmiche@example.com"
+    ];
+    expect(res.status).toBe(200);
+    expect(res.body.recipients.sort()).toEqual(expectedNotificationList.sort());
+  });
 });

@@ -156,11 +156,17 @@ const retrievefornotifications = async (req, res, next) => {
   const criteria1 = "isSuspended = 0";
   const queryStr = `SELECT (email), (teachers_id) FROM ${TABLE_STUDENTS} WHERE ${criteria1}`;
   const studentsNotSuspended = await database.query(pool, queryStr);
-  console.log("results", studentsNotSuspended);
+  // console.log("results", studentsNotSuspended);
 
   // Criteria 2: registered with teacher OR mentioned notification
   // filter out students registered with teacher
   const teacherIndex = await getTeacherIndex(teacher);
+  // ERROR-HANDLING: Check if teacher exists, exit if doesn't
+  if (teacherIndex < 0) {
+    return res
+      .status(400)
+      .json({ message: `Teacher ${teacher} does not exist.` });
+  }
   const notificationList = studentsNotSuspended
     .filter(student => {
       const teachers_id = student.teachers_id || "";
