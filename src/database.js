@@ -1,6 +1,8 @@
 const mysql = require("promise-mysql");
 
 const { NODE_ENV, PRODUCTION_DB, DEVELOPMENT_DB } = process.env;
+const db = NODE_ENV === "production" ? PRODUCTION_DB : DEVELOPMENT_DB;
+
 const database = {
   connect: () => {
     // connect to db
@@ -8,12 +10,12 @@ const database = {
       host: "localhost",
       user: "root",
       password: "password",
-      database: NODE_ENV === "production" ? PRODUCTION_DB : DEVELOPMENT_DB
+      database: db
     });
     pool.getConnection((error, connection) => {
       if (error) throw error;
       if (connection) {
-        console.log("Database 'school' connected");
+        console.log(`Database ${db} connected`);
         connection.release();
         return;
       }

@@ -1,4 +1,4 @@
 const showHomepage = (req, res, next) => {
-  res.json({ message: "Homepage" });
+  res.status(200).json({ message: "Homepage" });
 };
 module.exports = { showHomepage };
