@@ -14,7 +14,7 @@ const getAllTeachers = async () => {
   return await database.query(pool, queryStr);
 };
 // GET a teacher's index from db (Helper)
-const getIndexTeacher = async findTeacher => {
+const getTeacherIndex = async findTeacher => {
   const allTeachers = await getAllTeachers();
   return allTeachers.map(dbTeacher => dbTeacher.email).indexOf(findTeacher);
 };
@@ -30,7 +30,7 @@ const getAllStudents = async () => {
   return await database.query(pool, queryStr);
 };
 // GET a students's index from db (Helper)
-const getIndexStudent = async findStudent => {
+const getStudentIndex = async findStudent => {
   const allStudents = await getAllStudents();
   return allStudents.map(dbStudent => dbStudent.email).indexOf(findStudent);
 };
@@ -49,7 +49,7 @@ const getStudentTeachersId = async studentEmail => {
 // Register a student to a teacher
 const register = async (req, res, next) => {
   const { body } = req;
-  const indexTeacher = await getIndexTeacher(body.teacher); // from db
+  const indexTeacher = await getTeacherIndex(body.teacher); // from db
   // Check if teacher exists, exit if doesn't
   if (indexTeacher < 0) {
     return res
@@ -59,7 +59,7 @@ const register = async (req, res, next) => {
 
   body.students.forEach(async studentEmail => {
     // Check if student exists
-    const indexStudent = await getIndexStudent(studentEmail);
+    const indexStudent = await getStudentIndex(studentEmail);
     if (indexStudent < 0) {
       // if student does not exist, add new student
       const results = await database.insert(
@@ -103,7 +103,7 @@ const commonstudents = async (req, res, next) => {
   const allStudents = await getAllStudents();
   let commonStudents = [];
   const allQueryTeachersIndex = await Promise.all(
-    queryTeachers.map(async queryTeacher => await getIndexTeacher(queryTeacher))
+    queryTeachers.map(async queryTeacher => await getTeacherIndex(queryTeacher))
   );
   // Map through each student, find one whose teachers_id contain all indexes of teachers in query
   allStudents.forEach(student => {
@@ -153,7 +153,7 @@ const retrievefornotifications = async (req, res, next) => {
 
   // Criteria 2: registered with teacher OR mentioned notification
   // filter out students registered with teacher
-  const teacherIndex = await getIndexTeacher(teacher);
+  const teacherIndex = await getTeacherIndex(teacher);
   const notificationList = studentsNotSuspended
     .filter(student => {
       const teachers_id = student.teachers_id || "";
@@ -174,6 +174,10 @@ const retrievefornotifications = async (req, res, next) => {
   res.status(200).json({ recipients: notificationList });
 };
 module.exports = {
+  getAllTeachers,
+  getTeacherIndex,
+  getAllStudents,
+  getStudentIndex,
   register,
   commonstudents,
   students,
