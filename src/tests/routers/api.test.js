@@ -1,10 +1,13 @@
 require("dotenv").config();
 
+const express = require("express");
 const request = require("supertest");
-const app = require("../index");
+const apiRouter = require("../../routers/api");
+const apiController = require("../../controllers/apiController");
 
-const apiController = require("../controllers/apiController");
+const app = express();
 
+apiRouter(app);
 describe("api router test", () => {
   test("POST /api/register to return status 400", async () => {
     const req = {
