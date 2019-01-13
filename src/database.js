@@ -1,7 +1,6 @@
 const mysql = require("promise-mysql");
 
-const { SCHEMA } = require("./constants");
-
+const { NODE_ENV, PRODUCTION_DB, DEVELOPMENT_DB } = process.env;
 const database = {
   connect: () => {
     // connect to db
@@ -9,7 +8,7 @@ const database = {
       host: "localhost",
       user: "root",
       password: "password",
-      database: SCHEMA
+      database: NODE_ENV === "production" ? PRODUCTION_DB : DEVELOPMENT_DB
     });
     pool.getConnection((error, connection) => {
       if (error) throw error;
