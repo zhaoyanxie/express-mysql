@@ -73,4 +73,38 @@ describe("api router test", () => {
     expect(commonStudents).toHaveLength(1);
     expect(commonStudents[0].includes("newstudent")).toBe(true);
   });
+  test("POST /api/suspend to suspend a student and return status 204", async () => {
+    const reqRegister = {
+      teacher: "teacherken@email.com",
+      students: ["suspendedstudent@email.com"]
+    };
+    const reqSuspend = {
+      student: "suspendedstudent@email.com"
+    };
+    await request(app)
+      .post("/api/register")
+      .send(reqRegister);
+    const res = await request(app)
+      .post("/api/suspend")
+      .send(reqSuspend);
+    const resStudents = await request(app).get("/api/students");
+    const suspendedStudent = resStudents.body.filter(s =>
+      s.email.includes("suspendedstudent")
+    )[0];
+    expect(res.status).toBe(204);
+    expect(suspendedStudent.isSuspended).toBe(1);
+  });
+  test("POST /api/suspend to suspend a student and return status 400 when student not found", async () => {
+    const reqSuspend = {
+      student: "doesnotexist@email.com"
+    };
+    const res = await request(app)
+      .post("/api/suspend")
+      .send(reqSuspend);
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe(
+      "Student doesnotexist@email.com does not exist"
+    );
+  });
 });

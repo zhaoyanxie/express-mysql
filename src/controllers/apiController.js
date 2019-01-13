@@ -132,7 +132,14 @@ const commonstudents = async (req, res, next) => {
 
 const suspend = async (req, res, next) => {
   const studentToSuspend = req.body.student;
-  const results = await database.update(
+  // ERROR-HANDLING: check if student exists
+  const indexStudent = await getStudentIndex(studentToSuspend);
+  if (indexStudent < 0)
+    return res
+      .status(400)
+      .json({ message: `Student ${studentToSuspend} does not exist` });
+
+  await database.update(
     pool,
     TABLE_STUDENTS,
     "isSuspended",
@@ -140,7 +147,7 @@ const suspend = async (req, res, next) => {
     "email",
     studentToSuspend
   );
-  res.json({ message: "suspend" });
+  res.status(204).json({ message: "suspend" });
 };
 
 const retrievefornotifications = async (req, res, next) => {
