@@ -124,7 +124,7 @@ const commonstudents = async (req, res, next) => {
       commonStudents.push(
         ...allStudents.filter(s => s.email === student.email).map(s => s.email)
       );
-    } //
+    }
   });
 
   res.status(200).json({ students: commonStudents });

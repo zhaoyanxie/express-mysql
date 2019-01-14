@@ -7,8 +7,6 @@ const app = express();
 app.use(express.json());
 
 index(app);
-api(app); 
-
-// app.use(errorHandler);
+api(app);
 
 module.exports = app;
