@@ -29,7 +29,7 @@ CREATE TABLE `tbl_students` (
   `isSuspended` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -38,7 +38,7 @@ CREATE TABLE `tbl_students` (
 
 LOCK TABLES `tbl_students` WRITE;
 /*!40000 ALTER TABLE `tbl_students` DISABLE KEYS */;
-INSERT INTO `tbl_students` VALUES (1,'student@example.com',NULL,0),(16,'studentjon@example.com','0,1,2',0),(17,'studenthon@example.com','0,1,2',0),(18,'studentonlyken@example.com','0',0),(19,'studentmary@example.com','1',1);
+INSERT INTO `tbl_students` VALUES (0,'student@email.com','-1',0);
 /*!40000 ALTER TABLE `tbl_students` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -53,7 +53,7 @@ CREATE TABLE `tbl_teachers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `email` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +62,7 @@ CREATE TABLE `tbl_teachers` (
 
 LOCK TABLES `tbl_teachers` WRITE;
 /*!40000 ALTER TABLE `tbl_teachers` DISABLE KEYS */;
-INSERT INTO `tbl_teachers` VALUES (1,'teacherken@gmail.com'),(2,'teacherjim@gmail.com'),(3,'teacherjoe@gmail.com');
+INSERT INTO `tbl_teachers` VALUES (0,'teacherken@email.com'),(1,'teacherjim@email.com'),(2,'teacherjoe@email.com');
 /*!40000 ALTER TABLE `tbl_teachers` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -75,4 +75,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-01-12 22:37:29
+-- Dump completed on 2019-01-14 20:04:32
