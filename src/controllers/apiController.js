@@ -8,19 +8,22 @@ const {
 
 const pool = database.connect();
 
-// Drop table
-const dropTable = async () => {
-  await database.dropTable(pool, TABLE_TEACHERS);
-};
 // GET all teachers (Helper)
 const getAllTeachers = async () => {
   const queryStr = `SELECT * from ${TABLE_TEACHERS}`;
   return await database.query(pool, queryStr);
 };
-// GET a teacher's index from db (Helper)
+// GET a teacher's UNIQUE index from db (Helper)
 const getTeacherIndex = async findTeacher => {
-  const allTeachers = await getAllTeachers();
-  return allTeachers.map(dbTeacher => dbTeacher.email).indexOf(findTeacher);
+  const queryStr = `SELECT teacher_id FROM ${TABLE_TEACHERS} WHERE teacher_email='${findTeacher}'`;
+  try {
+    const response = await database.query(pool, queryStr);
+    if (response.length === 0) return -1;
+    return response[0].teacher_id;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
 };
 // Return all teachers
 const teachers = async (req, res, next) => {
@@ -33,23 +36,19 @@ const getAllStudents = async () => {
   const queryStr = `SELECT * from ${TABLE_STUDENTS}`;
   return await database.query(pool, queryStr);
 };
-// GET a students's index from db (Helper)
-const getStudentIndex = async findStudent => {
-  const allStudents = await getAllStudents();
-  return allStudents.map(dbStudent => dbStudent.email).indexOf(findStudent);
-};
+
 // GET all students
 const students = async (req, res, next) => {
-  // TODO: const queryStr = `DELETE FROM students WHERE id = 3`;
   const results = await getAllStudents();
   res.json(results);
 };
 
-// GET teachers_id of a student in array? (Helper)
-const getStudentTeachersId = async studentEmail => {
-  const queryStr = `SELECT teachers_id from ${TABLE_STUDENTS} WHERE email = '${studentEmail}'`;
+// GET teachers_id of a student and return as an array (Helper)
+const getStudentsTeacherId = async studentEmail => {
+  const queryStr = `SELECT teacher_id from ${TABLE_STUDENTS} WHERE student_email = '${studentEmail}'`;
   return await database.query(pool, queryStr);
 };
+
 // Register a student to a teacher
 const register = async (req, res, next) => {
   const { body } = req;
@@ -60,43 +59,16 @@ const register = async (req, res, next) => {
       .status(400)
       .json({ message: `Teacher ${body.teacher} does not exist.` });
   }
-
   body.students.forEach(async studentEmail => {
-    // Check if student exists
-    const indexStudent = await getStudentIndex(studentEmail);
-    if (indexStudent < 0) {
-      // if student does not exist, add new student
-      const results = await database.insert(
-        pool,
-        TABLE_STUDENTS,
-        studentEmail,
-        indexTeacher.toString()
-      );
-      console.log(`Student ${studentEmail} created, ${results.message}`);
-    } else {
-      // find student's teacher_id column
-      const queryResults = await getStudentTeachersId(studentEmail);
-      const teachers_id = queryResults[0].teachers_id;
-      const teachers_idArr = teachers_id.split(",") || [];
-      // update student's teacher_id column if yet to be registered
-      if (teachers_idArr.indexOf(indexTeacher.toString()) < 0) {
-        const updated_teachers_id = [...teachers_idArr, indexTeacher]
-          .sort()
-          .join(",");
-        const results = await database.update(
-          pool,
-          TABLE_STUDENTS,
-          STUDENTS_COL_TEACHERS_ID,
-          // "1,2",
-          updated_teachers_id,
-          "email",
-          studentEmail
-        );
-        console.log(`Student ${studentEmail} updated, ${results.message}`);
-      }
-    }
+    const response = await database.insertIntoStudentsTable(
+      pool,
+      TABLE_STUDENTS,
+      studentEmail,
+      indexTeacher
+    );
+    // Todo: if registration is 0 then not added.
+    console.log("Student registration", response.insertId);
   });
-
   res.status(204).json({ message: "registered" });
 };
 // Join students to a common teacher
@@ -191,12 +163,10 @@ const retrievefornotifications = async (req, res, next) => {
   res.status(200).json({ recipients: notificationList });
 };
 module.exports = {
-  dropTable,
   getAllTeachers,
   getTeacherIndex,
   getAllStudents,
-  getStudentIndex,
-  getStudentTeachersId,
+  getStudentsTeacherId,
   register,
   commonstudents,
   students,

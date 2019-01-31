@@ -27,10 +27,10 @@ const database = {
     return await pool.query(queryStr);
   },
   // INSERT INTO tbl_teachers(teacher_email) VALUES ("teacherken@email.com");
-  insert: async (pool, table, email, teachers_id) => {
+  insertIntoStudentsTable: async (pool, table, studentEmail, teacher_id) => {
     try {
       return await pool.query(
-        `INSERT INTO ${table} (email, teachers_id) VALUES ('${email}', ${teachers_id})`
+        `INSERT IGNORE INTO ${table} (student_email, teacher_id) VALUES ('${studentEmail}', ${teacher_id})`
       );
     } catch (error) {
       throw error;
