@@ -26,6 +26,7 @@ const database = {
     const queryStr = `UPDATE ${table} SET ${column} = '${value}' WHERE ${condition} = '${conditionValue}'`;
     return await pool.query(queryStr);
   },
+  // INSERT INTO tbl_teachers(teacher_email) VALUES ("teacherken@email.com");
   insert: async (pool, table, email, teachers_id) => {
     try {
       return await pool.query(

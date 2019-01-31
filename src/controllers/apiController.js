@@ -8,6 +8,10 @@ const {
 
 const pool = database.connect();
 
+// Drop table
+const dropTable = async () => {
+  await database.dropTable(pool, TABLE_TEACHERS);
+};
 // GET all teachers (Helper)
 const getAllTeachers = async () => {
   const queryStr = `SELECT * from ${TABLE_TEACHERS}`;
@@ -187,6 +191,7 @@ const retrievefornotifications = async (req, res, next) => {
   res.status(200).json({ recipients: notificationList });
 };
 module.exports = {
+  dropTable,
   getAllTeachers,
   getTeacherIndex,
   getAllStudents,
