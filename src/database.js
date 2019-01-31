@@ -40,6 +40,8 @@ const database = {
     const results = await pool.query(queryStr);
     return results;
   }
+  // TODO: Inner join
+  // SELECT teacher_id, student_id FROM tbl_students INNER JOIN tbl_teachers USING (teacher_id)
 };
 
 module.exports = database;
