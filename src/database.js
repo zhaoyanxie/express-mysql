@@ -26,22 +26,18 @@ const database = {
     const queryStr = `UPDATE ${table} SET ${column} = '${value}' WHERE ${condition} = '${conditionValue}'`;
     return await pool.query(queryStr);
   },
-  // INSERT INTO tbl_teachers(teacher_email) VALUES ("teacherken@email.com");
-  insertIntoStudentsTable: async (pool, table, studentEmail, teacher_id) => {
-    try {
-      return await pool.query(
-        `INSERT IGNORE INTO ${table} (student_email, teacher_id) VALUES ('${studentEmail}', ${teacher_id})`
-      );
-    } catch (error) {
-      throw error;
-    }
+  insert: async (pool, table, email) => {
+    const queryStr = `INSERT INTO ${table}(email) VALUES ('${email}')`;
+    return await pool.query(queryStr);
+  },
+  insertTeacherStudent: async (pool, table, teacher_id, student_id) => {
+    const queryStr = `INSERT INTO ${table}(teacher_id, student_id) VALUES (${teacher_id}, ${student_id})`;
+    return await pool.query(queryStr);
   },
   query: async (pool, queryStr) => {
     const results = await pool.query(queryStr);
     return results;
   }
-  // TODO: Inner join
-  // SELECT teacher_id, student_id FROM tbl_students INNER JOIN tbl_teachers USING (teacher_id)
 };
 
 module.exports = database;

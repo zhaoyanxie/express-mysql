@@ -12,7 +12,7 @@ router.get("/students", apiController.students);
 // POST: register a student to a teacher
 router.post("/register", apiController.register);
 // GET: common students to array of teachers
-router.get("/commonstudents", apiController.commonstudents);
+router.get("/commonstudents", apiController.commonStudents);
 // POST: suspend student
 router.post("/suspend", apiController.suspend);
 // POST: send notification to student
