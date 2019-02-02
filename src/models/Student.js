@@ -4,6 +4,17 @@ const { getIdByEmail, getEmailById } = require("../utils");
 
 const pool = database.connect();
 
+exports.init = async pool => {
+  try {
+    await database.dropTable(pool, TABLE_STUDENTS);
+    await database.initTable(pool, TABLE_STUDENTS);
+  } catch (e) {
+    throw e;
+  }
+};
+exports.insert = async (pool, studentEmail) =>
+  await database.insert(pool, TABLE_STUDENTS, studentEmail);
+
 exports.getAll = async () => {
   const queryStr = `SELECT * from ${TABLE_STUDENTS}`;
   return await database.query(pool, queryStr);
