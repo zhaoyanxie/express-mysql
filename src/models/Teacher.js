@@ -1,15 +1,6 @@
 const database = require("../database");
-const { TABLE_TEACHERS } = require("../constants");
+const { TABLE_TEACHERS, TABLE_TEACHERS_STUDENTS } = require("../constants");
 const { getIdByEmail, getEmailById } = require("../utils");
-
-exports.init = async pool => {
-  try {
-    await database.dropTable(pool, TABLE_TEACHERS);
-    await database.initTable(pool, TABLE_TEACHERS);
-  } catch (e) {
-    throw e;
-  }
-};
 
 exports.insert = async (pool, teacherEmail) =>
   await database.insert(pool, TABLE_TEACHERS, teacherEmail);

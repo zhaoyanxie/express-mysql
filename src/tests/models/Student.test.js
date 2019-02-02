@@ -2,7 +2,11 @@ require("dotenv").config();
 
 const database = require("../../database");
 const Student = require("../../models/Student");
-const { TABLE_STUDENTS } = require("../../constants");
+const {
+  TABLE_STUDENTS,
+  TABLE_TEACHERS,
+  TABLE_TEACHERS_STUDENTS
+} = require("../../constants");
 
 const pool = database.connect();
 
@@ -13,10 +17,20 @@ describe("Student model test", () => {
   const studentBob = "studentbob@email.com";
 
   beforeAll(async () => {
-    await Student.init(pool);
+    // await Student.init(pool);
+    await database.dropTable(pool, TABLE_TEACHERS_STUDENTS);
+    await database.dropTable(pool, TABLE_STUDENTS);
+    await database.initTable(pool, TABLE_STUDENTS);
     allStudents.push(...(await Student.getAll(pool)));
   });
-
+  afterAll(async () => {
+    await database.dropTable(pool, TABLE_TEACHERS_STUDENTS);
+    await database.dropTable(pool, TABLE_STUDENTS);
+    await database.dropTable(pool, TABLE_TEACHERS);
+    await database.initTable(pool, TABLE_STUDENTS);
+    await database.initTable(pool, TABLE_TEACHERS);
+    await database.initTable(pool, TABLE_TEACHERS_STUDENTS);
+  });
   test(`Initial ${TABLE_STUDENTS} should be empty`, async () => {
     expect(allStudents.length).toBe(0);
   });
