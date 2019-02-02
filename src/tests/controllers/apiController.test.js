@@ -29,6 +29,13 @@ describe("apiController test", () => {
     );
     expect(response).toBe(-1);
   });
+
+  test("getById returns the email of a person", async () => {
+    // TODO: implement drop table
+    const queryTeacher = await apiController.getById(TABLE_TEACHERS, 1);
+    expect(queryTeacher.email).toBe("teacherken@email.com");
+  });
+
   test.skip("getAllStudents returns the students preloaded in test database.", async () => {
     const allStudents = await apiController.getAllStudents();
     expect(allStudents.length).toBeGreaterThan(0);

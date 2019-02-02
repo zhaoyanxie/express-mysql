@@ -35,15 +35,12 @@ describe("api router test", () => {
       `Teacher ${userDoesNotExist} does not exist.`
     );
   });
+  // TODO: implement drop table
   test.skip("POST /api/register to register a student (unregistered in database) to return status 204", async () => {
     const req = {
       teacher: teacherJim,
       students: ["newstudent@email.com", "studentOnlyJim@email.com"]
     };
-    const teacherJimIndex = await apiController.getIndex(
-      TABLE_TEACHERS,
-      req.teacher
-    );
     const res = await request(app)
       .post("/api/register")
       .send(req);
@@ -53,8 +50,8 @@ describe("api router test", () => {
     )[0];
     expect(res.status).toBe(204);
     expect(newStudent.email).toBe(req.students[0]);
-    // expect(newStudent.teacher_id).toBe(teacherJimIndex);
   });
+
   test.skip("POST /api/register to update a registered student's teachers_id to return status 204", async () => {
     const req = {
       teacher: teacherKen,
@@ -84,7 +81,7 @@ describe("api router test", () => {
     );
   });
 
-  test.only("GET /api/commonstudents to return 'newstudent@email.com' for Teachers Ken and Jim", async () => {
+  test("GET /api/commonstudents to return 'newstudent@email.com' for Teachers Ken and Jim", async () => {
     const query = {
       teacher: [teacherKen, teacherJoe]
     };
@@ -94,7 +91,7 @@ describe("api router test", () => {
     const commonStudents = res.body.students;
     expect(commonStudents[0].includes("newstudent")).toBe(true);
   });
-  test.skip("POST /api/suspend to suspend a student and return status 204", async () => {
+  test("POST /api/suspend to suspend a student and return status 204", async () => {
     const reqRegister = {
       teacher: teacherKen,
       students: ["suspendedstudent@email.com"]
@@ -102,20 +99,26 @@ describe("api router test", () => {
     const reqSuspend = {
       student: "suspendedstudent@email.com"
     };
-    await request(app)
-      .post("/api/register")
-      .send(reqRegister);
+    let indexStudent = await apiController.getIndex(
+      TABLE_STUDENTS,
+      reqSuspend.student
+    );
+    // TODO: Remove if drop table is implemented
+    if (indexStudent < 0)
+      indexStudent = await request(app)
+        .post("/api/register")
+        .send(reqRegister);
     const res = await request(app)
       .post("/api/suspend")
       .send(reqSuspend);
-    const resStudents = await request(app).get("/api/students");
-    const suspendedStudent = resStudents.body.filter(s =>
-      s.email.includes("suspendedstudent")
-    )[0];
+    const queryStudent = await apiController.getById(
+      TABLE_STUDENTS,
+      indexStudent
+    );
     expect(res.status).toBe(204);
-    expect(suspendedStudent.isSuspended).toBe(1);
+    expect(queryStudent.is_suspended).toBe(1);
   });
-  test.skip("POST /api/suspend to suspend a student and return status 400 when student not found", async () => {
+  test("POST /api/suspend to suspend a student and return status 400 when student not found", async () => {
     const reqSuspend = {
       student: userDoesNotExist
     };

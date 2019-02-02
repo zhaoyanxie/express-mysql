@@ -43,28 +43,14 @@ const getIndex = async (table, findPerson) => {
   }
 };
 
-// Register a student to a teacher
-// const register = async (req, res, next) => {
-//   const { body } = req;
-//   const indexTeacher = await getTeacherIndex(body.teacher); // from db
-//   // ERROR-HANDLING: Check if teacher exists, exit if doesn't
-//   if (indexTeacher < 0) {
-//     return res
-//       .status(400)
-//       .json({ message: `Teacher ${body.teacher} does not exist.` });
-//   }
-//   body.students.forEach(async studentEmail => {
-//     const response = await database.insertIntoStudentsTable(
-//       pool,
-//       TABLE_STUDENTS,
-//       studentEmail,
-//       indexTeacher
-//     );
-//     // Todo: if registration is 0 then not added.
-//     console.log("Student registration", response.insertId);
-//   });
-//   res.status(204).json({ message: "registered" });
-// };
+// GET a student or teacher's email by id (Helper)
+const getById = async (table, findById) => {
+  const queryStr = `SELECT * FROM ${table} WHERE id='${findById}'`;
+  const response = await database.query(pool, queryStr);
+  if (response.length === 0) return -1;
+  return response[0];
+};
+
 // ERROR-HANDLING:
 const checkTeacherExist = (res, indexTeacher, teacherEmail) => {
   if (indexTeacher < 0) {
@@ -108,10 +94,17 @@ const register = async (req, res, next) => {
       indexTeacher,
       indexStudent
     );
-    console.log(resInsertTeachersStudents);
+    if (resInsertTeachersStudents.insertId === 0)
+      console.log(`Entry in ${TABLE_TEACHERS_STUDENTS} already exist.`);
+    else
+      console.log(
+        `Entry in ${TABLE_TEACHERS_STUDENTS} inserted with id ${
+          resInsertTeachersStudents.insertId
+        }.`
+      );
   });
-
-  return res.status(204);
+  res.status(204);
+  return indexStudent;
 };
 
 // Join students to a common teacher
@@ -148,7 +141,7 @@ const commonStudents = async (req, res, next) => {
 const suspend = async (req, res, next) => {
   const studentToSuspend = req.body.student;
   // ERROR-HANDLING: check if student exists
-  const indexStudent = await getStudentIndex(studentToSuspend);
+  const indexStudent = await getIndex(TABLE_STUDENTS, studentToSuspend);
   if (indexStudent < 0)
     return res
       .status(400)
@@ -157,11 +150,12 @@ const suspend = async (req, res, next) => {
   await database.update(
     pool,
     TABLE_STUDENTS,
-    "isSuspended",
+    "is_suspended",
     1,
     "email",
     studentToSuspend
   );
+  console.log(`Student ${studentToSuspend} suspended.`);
   res.status(204).json({ message: "suspend" });
 };
 
@@ -205,6 +199,7 @@ module.exports = {
   getAllTeachers,
   getAllStudents,
   getIndex,
+  getById,
   register,
   commonStudents,
   students,
