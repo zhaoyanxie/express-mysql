@@ -47,9 +47,6 @@ const register = async (req, res, next) => {
   return res.status(201).json({ message: "registered" });
 };
 
-// // Join students to a common teacher
-// //SELECT DISTINCT t0.student_id FROM tbl_teachers_students t0 INNER JOIN tbl_teachers_students t1 ON t0.student_id = t1.student_id WHERE t0.teacher_id = 1 AND t1.teacher_id = 3
-
 const commonStudents = async (req, res, next) => {
   let queryTeachers = req.query.teacher;
   queryTeachers =
@@ -58,25 +55,19 @@ const commonStudents = async (req, res, next) => {
   return res.json({ students: commonStudents });
 };
 
-// const suspend = async (req, res, next) => {
-//   const studentToSuspend = req.body.student;
-//   // ERROR-HANDLING: check if student exists
-//   const indexStudent = await Student.getIdByEmail(studentToSuspend);
-//   if (indexStudent < 0)
-//     return res
-//       .status(400)
-//       .json({ message: `Student ${studentToSuspend} does not exist` });
+const suspend = async (req, res, next) => {
+  const studentToSuspend = req.body.student;
+  // ERROR-HANDLING: check if student exists
+  const indexStudent = await Student.getIdByEmail(studentToSuspend);
+  if (indexStudent < 0)
+    return res
+      .status(400)
+      .json({ message: `Student ${studentToSuspend} does not exist` });
+  await Student.suspend(studentToSuspend);
 
-//   await database.update(
-//     TABLE_STUDENTS,
-//     "is_suspended",
-//     1,
-//     "email",
-//     studentToSuspend
-//   );
-//   console.log(`Student ${studentToSuspend} suspended.`);
-//   res.status(204).json({ message: "suspend" });
-// };
+  console.log(`Student ${studentToSuspend} suspended.`);
+  res.status(204).json({ message: "suspend" });
+};
 
 // const retrievefornotifications = async (req, res, next) => {
 //   const { teacher, notification } = req.body;
@@ -118,7 +109,7 @@ module.exports = {
   teachers,
   students,
   register,
-  commonStudents
-  // suspend,
+  commonStudents,
+  suspend
   // retrievefornotifications
 };

@@ -18,7 +18,7 @@ router.post("/try", (req, res, next) => {
 // GET: common students to array of teachers
 router.get("/commonstudents", apiController.commonStudents);
 // POST: suspend student
-// router.post("/suspend", apiController.suspend);
+router.post("/suspend", apiController.suspend);
 // POST: send notification to student
 // router.post(
 //   "/retrievefornotifications",

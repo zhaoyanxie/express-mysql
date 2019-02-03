@@ -88,31 +88,18 @@ describe("api router test", () => {
     expect(commonStudents.indexOf(reqRegister.students[0])).toBeGreaterThan(-1);
   });
 
-  test.skip("POST /api/suspend to suspend a student and return status 204", async () => {
-    const reqRegister = {
-      teacher: teacherJim,
-      students: ["suspendedstudent@email.com"]
-    };
+  test("POST /api/suspend to suspend a student and return status 204", async () => {
     const reqSuspend = {
-      student: "suspendedstudent@email.com"
+      student: "studentOnlyJim@email.com"
     };
-    let indexStudent = await Student.getIdByEmail(reqSuspend.student);
-    // TODO: Remove if drop table is implemented
-    if (indexStudent < 0)
-      indexStudent = await request(app)
-        .post("/api/register")
-        .send(reqRegister);
     const res = await request(app)
       .post("/api/suspend")
       .send(reqSuspend);
-    const queryStudent = await apiController.getById(
-      TABLE_STUDENTS,
-      indexStudent
-    );
+    const queryStudent = await Student.getStudent(reqSuspend.student);
     expect(res.status).toBe(204);
-    expect(queryStudent.is_suspended).toBe(1);
+    expect(queryStudent[0].is_suspended).toBe(1);
   });
-  test.skip("POST /api/suspend to suspend a student and return status 400 when student not found", async () => {
+  test("POST /api/suspend to suspend a student and return status 400 when student not found", async () => {
     const reqSuspend = {
       student: userDoesNotExist
     };

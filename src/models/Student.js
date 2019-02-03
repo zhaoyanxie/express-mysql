@@ -1,5 +1,5 @@
 const database = require("../database");
-const { TABLE_STUDENTS, TABLE_TEACHERS_STUDENTS } = require("../constants");
+const { TABLE_STUDENTS } = require("../constants");
 const { getIdByEmail, getEmailById } = require("../utils");
 
 exports.insert = async studentEmail => {
@@ -29,4 +29,9 @@ exports.suspend = async studentEmail => {
     "email",
     studentEmail
   );
+
+  exports.getStudent = async studentEmail => {
+    const queryStr = `SELECT * FROM ${TABLE_STUDENTS} WHERE email = '${studentEmail}'`;
+    return await database.query(queryStr);
+  };
 };

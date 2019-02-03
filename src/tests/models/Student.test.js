@@ -34,8 +34,7 @@ describe("Student model test", () => {
   test("suspend a student", async () => {
     const student1 = await Student.getEmailById(1);
     await Student.suspend(student1);
-    const resAllStudents = await Student.getAll();
-    const resStudent1 = resAllStudents.filter(s => s.email === student1);
+    const resStudent1 = await Student.getStudent(student1);
     expect(resStudent1[0].is_suspended).toBe(1);
   });
 });
