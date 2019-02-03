@@ -10,14 +10,12 @@ exports.getAll = async pool => {
   return await database.query(pool, queryStr);
 };
 
-exports.getIdByEmail = async getTeacher => {
-  const id = await getIdByEmail(TABLE_TEACHERS, getTeacher);
-  if (!id) return -1;
-  return id;
+exports.getIdByEmail = async (pool, getTeacher) => {
+  const id = await getIdByEmail(pool, TABLE_TEACHERS, getTeacher);
+  return !id ? -1 : id;
 };
 
-exports.getEmailById = async getTeacher => {
-  const email = await getEmailById(TABLE_TEACHERS, getTeacher);
-  if (!email) return -1;
-  return email;
+exports.getEmailById = async (pool, getTeacher) => {
+  const email = await getEmailById(pool, TABLE_TEACHERS, getTeacher);
+  return !email ? null : email;
 };
