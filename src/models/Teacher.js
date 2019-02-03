@@ -17,5 +17,5 @@ exports.getIdByEmail = async (pool, getTeacher) => {
 
 exports.getEmailById = async (pool, getTeacher) => {
   const email = await getEmailById(pool, TABLE_TEACHERS, getTeacher);
-  return !email ? null : email;
+  return email === null ? null : email;
 };

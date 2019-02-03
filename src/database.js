@@ -51,7 +51,7 @@ const database = {
   initTable: async (pool, table) => {
     let queryStr = "";
     if (table === TABLE_STUDENTS)
-      queryStr = `CREATE TABLE ${TABLE_STUDENTS} (
+      queryStr = `CREATE TABLE IF NOT EXISTS ${TABLE_STUDENTS} (
         id int(11) NOT NULL AUTO_INCREMENT,
         email varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
         is_suspended int(11) NOT NULL DEFAULT 0,
@@ -59,15 +59,14 @@ const database = {
         UNIQUE KEY email_UNIQUE (email)
       ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`;
     if (table === TABLE_TEACHERS)
-      queryStr = `CREATE TABLE ${TABLE_TEACHERS} (
+      queryStr = `CREATE TABLE IF NOT EXISTS ${TABLE_TEACHERS} (
         id int(11) NOT NULL AUTO_INCREMENT,
         email varchar(45) COLLATE utf8mb4_general_ci NOT NULL,
-        is_suspended int(11) NOT NULL DEFAULT 0,
         PRIMARY KEY (id),
         UNIQUE KEY email_UNIQUE (email)
       ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci`;
     if (table === TABLE_TEACHERS_STUDENTS)
-      queryStr = `CREATE TABLE ${TABLE_TEACHERS_STUDENTS} (
+      queryStr = `CREATE TABLE IF NOT EXISTS ${TABLE_TEACHERS_STUDENTS} (
           student_id int(11) NOT NULL,
           teacher_id int(11) NOT NULL,
           PRIMARY KEY (student_id, teacher_id),

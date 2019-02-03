@@ -18,7 +18,6 @@ describe("Teacher model test", () => {
   const unregisteredUser = "unregistered@email.com";
 
   beforeAll(async () => {
-    // await Teacher.init(pool);
     await database.dropTable(pool, TABLE_TEACHERS_STUDENTS);
     await database.dropTable(pool, TABLE_TEACHERS);
     await database.dropTable(pool, TABLE_STUDENTS);
@@ -46,7 +45,7 @@ describe("Teacher model test", () => {
     const id = await Teacher.getIdByEmail(pool, teacher1.email);
     expect(id).toBe(teacher1.id);
   });
-  test("getIdByEmail should return -1 forunregistered user", async () => {
+  test("getIdByEmail should return -1 for unregistered user", async () => {
     const id = await Teacher.getIdByEmail(pool, unregisteredUser);
     expect(id).toBe(-1);
   });
