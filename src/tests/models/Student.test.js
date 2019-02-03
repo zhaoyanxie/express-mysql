@@ -31,4 +31,11 @@ describe("Student model test", () => {
     const email = await Student.getEmailById(unregisteredUser);
     expect(email).toBe(null);
   });
+  test("suspend a student", async () => {
+    const student1 = await Student.getEmailById(1);
+    await Student.suspend(student1);
+    const resAllStudents = await Student.getAll();
+    const resStudent1 = resAllStudents.filter(s => s.email === student1);
+    expect(resStudent1[0].is_suspended).toBe(1);
+  });
 });

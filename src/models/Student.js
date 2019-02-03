@@ -20,3 +20,13 @@ exports.getEmailById = async getStudent => {
   const email = await getEmailById(TABLE_STUDENTS, getStudent);
   return email === null ? null : email;
 };
+
+exports.suspend = async studentEmail => {
+  await database.update(
+    TABLE_STUDENTS,
+    "is_suspended",
+    1,
+    "email",
+    studentEmail
+  );
+};
