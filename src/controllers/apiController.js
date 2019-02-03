@@ -49,29 +49,13 @@ const register = async (req, res, next) => {
 
 // // Join students to a common teacher
 // //SELECT DISTINCT t0.student_id FROM tbl_teachers_students t0 INNER JOIN tbl_teachers_students t1 ON t0.student_id = t1.student_id WHERE t0.teacher_id = 1 AND t1.teacher_id = 3
-// const commonStudentsQuery = indexesTeachers => {
-//   let querySelect = `SELECT DISTINCT email FROM ${TABLE_STUDENTS} t `;
-//   let queryInnerJoin = `INNER JOIN ${TABLE_TEACHERS_STUDENTS} t0 ON t.id = t0.student_id `;
-//   let queryWhere = `WHERE t0.teacher_id = ${indexesTeachers[0]} `;
 
-//   indexesTeachers.forEach((indexTeacher, i) => {
-//     if (i > 0) {
-//       queryInnerJoin += `INNER JOIN ${TABLE_TEACHERS_STUDENTS} t${i} ON t.id = t${i}.student_id `;
-//       queryWhere += `AND t${i}.teacher_id = ${indexTeacher} `;
-//     }
-//   });
-//   return querySelect + queryInnerJoin + queryWhere;
-// };
 const commonStudents = async (req, res, next) => {
   let queryTeachers = req.query.teacher;
   queryTeachers =
     queryTeachers.constructor === Array ? queryTeachers : [queryTeachers];
-  const indexesTeachers = await Promise.all(
-    queryTeachers.map(async teacher => await Teacher.getIdByEmail(teacher))
-  );
-  const response = await database.query(commonStudentsQuery(indexesTeachers));
-  const responseStudents = response.map(resObj => Object.values(resObj)[0]);
-  return res.json({ students: responseStudents });
+  const commonStudents = await TeacherStudent.getCommonStudents(queryTeachers);
+  return res.json({ students: commonStudents });
 };
 
 // const suspend = async (req, res, next) => {

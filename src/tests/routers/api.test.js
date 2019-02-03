@@ -56,8 +56,7 @@ describe("api router test", () => {
     const idStudent2 = await Student.getIdByEmail(req.students[1]);
     const idTeacherJim = await Teacher.getIdByEmail(req.teacherJim);
     const allTeacherStudent = await TeacherStudent.getAll();
-    expect(idStudent1).toBeGreaterThan(0);
-    expect(idStudent2).toBeGreaterThan(0);
+
     expect(
       allTeacherStudent.find(
         ele => ele.student_id === idStudent1 && ele.teacher_id === idTeacherJim
@@ -70,16 +69,25 @@ describe("api router test", () => {
     ).toBeTruthy;
   });
 
-  test.skip("GET /api/commonstudents to return 'newstudent@email.com' for Teachers Joe and Jim", async () => {
+  test("GET /api/commonstudents to return 'newstudent@email.com' for Teachers Joe and Jim", async () => {
     const query = {
       teacher: [teacherJim, teacherJoe]
     };
+    const reqRegister = {
+      teacher: teacherJoe,
+      students: ["newstudent@email.com"]
+    };
+    await request(app)
+      .post("/api/register")
+      .send(reqRegister);
+
     const res = await request(app)
       .get("/api/commonStudents")
       .query(query);
     const commonStudents = res.body.students;
-    expect(commonStudents[0].includes("newstudent")).toBe(true);
+    expect(commonStudents.indexOf(reqRegister.students[0])).toBeGreaterThan(-1);
   });
+
   test.skip("POST /api/suspend to suspend a student and return status 204", async () => {
     const reqRegister = {
       teacher: teacherJim,

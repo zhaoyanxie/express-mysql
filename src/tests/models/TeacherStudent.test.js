@@ -22,6 +22,8 @@ describe("TeacherStudent model test", () => {
     const commonStudents = await TeacherStudent.getCommonStudents(
       teacherEmailArr
     );
-    expect(commonStudents).toEqual([STUDENTS[1].email]);
+    expect(
+      commonStudents.find(student => student.includes(STUDENTS[1].email >= 0))
+    ).toBeTruthy;
   });
 });
