@@ -1,4 +1,4 @@
-const mysql = require("promise-mysql");
+const pool = require("./pool");
 
 const {
   TABLE_STUDENTS,
@@ -6,49 +6,28 @@ const {
   TABLE_TEACHERS_STUDENTS
 } = require("./constants");
 
-const { NODE_ENV, PRODUCTION_DB, DEVELOPMENT_DB } = process.env;
-const db = NODE_ENV === "production" ? PRODUCTION_DB : DEVELOPMENT_DB;
-
 const database = {
-  connect: () => {
-    // connect to db
-    const pool = mysql.createPool({
-      host: "localhost",
-      user: "root",
-      password: "password",
-      database: db
-    });
-    pool.getConnection((error, connection) => {
-      if (error) throw error;
-      if (connection) {
-        console.log(`Database ${db} connected`);
-        connection.release();
-        return;
-      }
-    });
-    return pool;
-  },
-  update: async (pool, table, column, value, condition, conditionValue) => {
+  update: async (table, column, value, condition, conditionValue) => {
     const queryStr = `UPDATE ${table} SET ${column} = '${value}' WHERE ${condition} = '${conditionValue}'`;
     return await pool.query(queryStr);
   },
-  insert: async (pool, table, email) => {
+  insert: async (table, email) => {
     const queryStr = `INSERT IGNORE INTO ${table}(email) VALUES ('${email}')`;
     return await pool.query(queryStr);
   },
-  insertTeacherStudent: async (pool, table, teacher_id, student_id) => {
+  insertTeacherStudent: async (table, teacher_id, student_id) => {
     const queryStr = `INSERT IGNORE INTO ${table}(teacher_id, student_id) VALUES (${teacher_id}, ${student_id})`;
     return await pool.query(queryStr);
   },
-  query: async (pool, queryStr) => {
+  query: async queryStr => {
     const results = await pool.query(queryStr);
     return results;
   },
-  dropTable: async (pool, table) => {
+  dropTable: async table => {
     const queryStr = `DROP TABLE IF EXISTS ${table}`;
     await pool.query(queryStr);
   },
-  initTable: async (pool, table) => {
+  initTable: async table => {
     let queryStr = "";
     if (table === TABLE_STUDENTS)
       queryStr = `CREATE TABLE IF NOT EXISTS ${TABLE_STUDENTS} (

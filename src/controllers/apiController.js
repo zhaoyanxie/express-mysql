@@ -6,49 +6,16 @@ const {
   TABLE_TEACHERS_STUDENTS
 } = require("../constants");
 
-const pool = database.connect();
+const { Teacher, Student, TeacherStudent } = require("../models");
 
-// GET all teachers (Helper)
-const getAllTeachers = async () => {
-  const queryStr = `SELECT * from ${TABLE_TEACHERS}`;
-  return await database.query(pool, queryStr);
-};
-// Return all teachers (Helper)
 const teachers = async (req, res, next) => {
-  const results = await getAllTeachers();
-  res.json(results);
+  const allTeachers = await Teacher.getAll();
+  res.status(200).json(allTeachers);
 };
 
-// GET all students (Helper)
-const getAllStudents = async () => {
-  const queryStr = `SELECT * from ${TABLE_STUDENTS}`;
-  return await database.query(pool, queryStr);
-};
-// GET all students
 const students = async (req, res, next) => {
-  const results = await getAllStudents();
-  res.json(results);
-};
-
-// GET a student or teacher's index from db (Helper)
-const getIndex = async (table, findPerson) => {
-  const queryStr = `SELECT id FROM ${table} WHERE email='${findPerson}'`;
-  try {
-    const response = await database.query(pool, queryStr);
-    if (response.length === 0) return -1;
-    return response[0].id;
-  } catch (e) {
-    console.log(e);
-    throw e;
-  }
-};
-
-// GET a student or teacher's email by id (Helper)
-const getById = async (table, findById) => {
-  const queryStr = `SELECT * FROM ${table} WHERE id='${findById}'`;
-  const response = await database.query(pool, queryStr);
-  if (response.length === 0) return -1;
-  return response[0];
+  const allStudents = await Student.getAll();
+  res.status(200).json(allStudents);
 };
 
 // ERROR-HANDLING:
@@ -63,36 +30,30 @@ const checkTeacherExist = (res, indexTeacher, teacherEmail) => {
 const register = async (req, res, next) => {
   const { body } = req;
   const { teacher, students } = body;
-  // 1. find teacher if exists
-  const indexTeacher = await getIndex(TABLE_TEACHERS, teacher); // from db
-  let indexStudent;
+  const idTeacher = await Teacher.getIdByEmail(teacher); // from db
+  let idStudent;
 
   // ERROR-HANDLING: Check if teacher exists, exit if doesn't
-  checkTeacherExist(res, indexTeacher, teacher);
+  checkTeacherExist(res, idTeacher, teacher);
 
   students.forEach(async student => {
     // 2. find if each student exist
-    indexStudent = await getIndex(TABLE_STUDENTS, student);
-    if (indexStudent === -1) {
+    idStudent = await Student.getIdByEmail(student);
+    if (idStudent === -1) {
       // 3. register student if student doesn't exist
-      const resRegisterStudent = await database.insert(
-        pool,
-        TABLE_STUDENTS,
-        student
-      );
+      const resRegisterStudent = await Student.insert(student);
       console.log(
         `Student ${student} inserted with id ${resRegisterStudent.insertId}`
       );
-      indexStudent = resRegisterStudent.insertId;
+      idStudent = resRegisterStudent.insertId;
     } else {
-      indexStudent = await getIndex(TABLE_STUDENTS, student);
+      idStudent = await Student.getIdByEmail(student);
     }
     // populate tbl_teachers_students
-    const resInsertTeachersStudents = await database.insertTeacherStudent(
-      pool,
+    const resInsertTeachersStudents = await TeacherStudent.insert(
       TABLE_TEACHERS_STUDENTS,
-      indexTeacher,
-      indexStudent
+      idTeacher,
+      idStudent
     );
     if (resInsertTeachersStudents.insertId === 0)
       console.log(`Entry in ${TABLE_TEACHERS_STUDENTS} already exist.`);
@@ -104,7 +65,7 @@ const register = async (req, res, next) => {
       );
   });
   res.status(204);
-  return indexStudent;
+  return idStudent;
 };
 
 // Join students to a common teacher
@@ -127,13 +88,10 @@ const commonStudents = async (req, res, next) => {
   queryTeachers =
     queryTeachers.constructor === Array ? queryTeachers : [queryTeachers];
   const indexesTeachers = await Promise.all(
-    queryTeachers.map(async teacher => await getIndex(TABLE_TEACHERS, teacher))
+    queryTeachers.map(async teacher => await Teacher.getIdByEmail(teacher))
   );
 
-  const response = await database.query(
-    pool,
-    commonStudentsQuery(indexesTeachers)
-  );
+  const response = await database.query(commonStudentsQuery(indexesTeachers));
   const responseStudents = response.map(resObj => Object.values(resObj)[0]);
   return res.json({ students: responseStudents });
 };
@@ -141,14 +99,13 @@ const commonStudents = async (req, res, next) => {
 const suspend = async (req, res, next) => {
   const studentToSuspend = req.body.student;
   // ERROR-HANDLING: check if student exists
-  const indexStudent = await getIndex(TABLE_STUDENTS, studentToSuspend);
+  const indexStudent = await Student.getIdByEmail(studentToSuspend);
   if (indexStudent < 0)
     return res
       .status(400)
       .json({ message: `Student ${studentToSuspend} does not exist` });
 
   await database.update(
-    pool,
     TABLE_STUDENTS,
     "is_suspended",
     1,
@@ -164,7 +121,7 @@ const retrievefornotifications = async (req, res, next) => {
   // Criteria 1: must not be suspended
   const criteria1 = "isSuspended = 0";
   const queryStr = `SELECT (email), (teachers_id) FROM ${TABLE_STUDENTS} WHERE ${criteria1}`;
-  const studentsNotSuspended = await database.query(pool, queryStr);
+  const studentsNotSuspended = await database.query(queryStr);
   // console.log("results", studentsNotSuspended);
 
   // Criteria 2: registered with teacher OR mentioned notification
@@ -196,14 +153,10 @@ const retrievefornotifications = async (req, res, next) => {
   res.status(200).json({ recipients: notificationList });
 };
 module.exports = {
-  getAllTeachers,
-  getAllStudents,
-  getIndex,
-  getById,
+  teachers,
+  students,
   register,
   commonStudents,
-  students,
   suspend,
-  teachers,
   retrievefornotifications
 };
