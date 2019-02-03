@@ -1,5 +1,5 @@
 const database = require("../database");
-const { TABLE_TEACHERS, TABLE_TEACHERS_STUDENTS } = require("../constants");
+const { TABLE_TEACHERS } = require("../constants");
 const { getIdByEmail, getEmailById } = require("../utils");
 
 exports.insert = async teacherEmail =>

@@ -9,14 +9,14 @@ const {
 const { Teacher, Student, TeacherStudent } = require("./models");
 
 const TEACHERS = [
-  { email: "teacherken@email.com" },
-  { email: "teacherjim@email.com" }
+  { email: "teacherjim@email.com" },
+  { email: "teacherjoe@email.com" }
 ];
 
 const STUDENTS = [
-  { email: "studentOnlyKen@email.com" },
-  { email: "studentKenAndJim@email.com" },
-  { email: "studentOnlyJim@email.com" }
+  { email: "studentOnlyJim@email.com" },
+  { email: "studentJimAndJoe@email.com" },
+  { email: "studentOnlyJoe@email.com" }
 ];
 
 const asyncForEach = async (arr, cb) => {
