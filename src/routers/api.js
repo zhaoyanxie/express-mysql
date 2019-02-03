@@ -11,8 +11,12 @@ router.get("/teachers", apiController.teachers);
 router.get("/students", apiController.students);
 // POST: register a student to a teacher
 router.post("/register", apiController.register);
+router.post("/try", (req, res, next) => {
+  console.log(req.body);
+  res.status(201).json({ message: "ok" });
+});
 // GET: common students to array of teachers
-// router.get("/commonstudents", apiController.commonStudents);
+router.get("/commonstudents", apiController.commonStudents);
 // POST: suspend student
 // router.post("/suspend", apiController.suspend);
 // POST: send notification to student

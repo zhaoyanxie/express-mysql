@@ -2,8 +2,9 @@ const database = require("../database");
 const { TABLE_STUDENTS, TABLE_TEACHERS_STUDENTS } = require("../constants");
 const { getIdByEmail, getEmailById } = require("../utils");
 
-exports.insert = async studentEmail =>
-  await database.insert(TABLE_STUDENTS, studentEmail);
+exports.insert = async studentEmail => {
+  return await database.insert(TABLE_STUDENTS, studentEmail);
+};
 
 exports.getAll = async () => {
   const queryStr = `SELECT * from ${TABLE_STUDENTS}`;
@@ -12,7 +13,7 @@ exports.getAll = async () => {
 
 exports.getIdByEmail = async getStudent => {
   const id = await getIdByEmail(TABLE_STUDENTS, getStudent);
-  return !id ? -1 : id;
+  return id;
 };
 
 exports.getEmailById = async getStudent => {

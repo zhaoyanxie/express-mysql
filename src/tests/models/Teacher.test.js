@@ -11,7 +11,7 @@ describe("Teacher model test", () => {
   });
 
   test("getAll should return all preloaded teachers", async () => {
-    expect(allTeachers.length).toBe(2);
+    expect(allTeachers.length).toBeGreaterThanOrEqual(2);
   });
   test("getIdByEmail should return id of teacher", async () => {
     const teacher1 = allTeachers[0];

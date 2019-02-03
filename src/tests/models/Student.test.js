@@ -11,7 +11,7 @@ describe("Student model test", () => {
     allStudents.push(...(await Student.getAll()));
   });
   test(`Initial ${TABLE_STUDENTS} should be have 3 preloaded students`, async () => {
-    expect(allStudents.length).toBe(3);
+    expect(allStudents.length).toBeGreaterThanOrEqual(3);
   });
   test("getIdByEmail should return id of student", async () => {
     const student1 = allStudents[0];

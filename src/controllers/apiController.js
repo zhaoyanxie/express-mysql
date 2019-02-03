@@ -1,11 +1,10 @@
 const database = require("../database");
-
+const { asyncForEach } = require("../utils/asyncForEach");
 const {
   TABLE_STUDENTS,
   TABLE_TEACHERS,
   TABLE_TEACHERS_STUDENTS
 } = require("../constants");
-
 const { Teacher, Student, TeacherStudent } = require("../models");
 
 const teachers = async (req, res, next) => {
@@ -19,51 +18,33 @@ const students = async (req, res, next) => {
 };
 
 // ERROR-HANDLING:
-const checkTeacherExist = (res, indexTeacher, teacherEmail) => {
+const checkTeacherExist = (res, next, indexTeacher, teacherEmail) => {
   if (indexTeacher < 0) {
     return res
       .status(400)
       .json({ message: `Teacher ${teacherEmail} does not exist.` });
   }
+  next();
 };
 
 const register = async (req, res, next) => {
   const { body } = req;
   const { teacher, students } = body;
-  const idTeacher = await Teacher.getIdByEmail(teacher); // from db
   let idStudent;
+  const idTeacher = await Teacher.getIdByEmail(teacher); // from db
+  checkTeacherExist(res, next, idTeacher, teacher);
 
-  // ERROR-HANDLING: Check if teacher exists, exit if doesn't
-  checkTeacherExist(res, idTeacher, teacher);
-
-  students.forEach(async student => {
-    // 2. find if each student exist
+  asyncForEach(students, async student => {
     idStudent = await Student.getIdByEmail(student);
-    if (idStudent === -1) {
-      // 3. register student if student doesn't exist
-      const resRegisterStudent = await Student.insert(student);
-      console.log(
-        `Student ${student} inserted with id ${resRegisterStudent.insertId}`
-      );
-      idStudent = resRegisterStudent.insertId;
-    } else {
+
+    if (idStudent < 0) {
+      await Student.insert(student);
       idStudent = await Student.getIdByEmail(student);
     }
-    const resInsertTeachersStudents = await TeacherStudent.insert(
-      idTeacher,
-      idStudent
-    );
-    if (resInsertTeachersStudents.insertId === 0)
-      console.log(`Entry in ${TABLE_TEACHERS_STUDENTS} already exist.`);
-    else
-      console.log(
-        `Entry in ${TABLE_TEACHERS_STUDENTS} inserted with id ${
-          resInsertTeachersStudents.insertId
-        }.`
-      );
+    await TeacherStudent.insert(idTeacher, idStudent);
   });
-  res.status(204);
-  return idStudent;
+
+  return res.status(201).json({ message: "registered" });
 };
 
 // // Join students to a common teacher
@@ -81,18 +62,17 @@ const register = async (req, res, next) => {
 //   });
 //   return querySelect + queryInnerJoin + queryWhere;
 // };
-// const commonStudents = async (req, res, next) => {
-//   let queryTeachers = req.query.teacher;
-//   queryTeachers =
-//     queryTeachers.constructor === Array ? queryTeachers : [queryTeachers];
-//   const indexesTeachers = await Promise.all(
-//     queryTeachers.map(async teacher => await Teacher.getIdByEmail(teacher))
-//   );
-
-//   const response = await database.query(commonStudentsQuery(indexesTeachers));
-//   const responseStudents = response.map(resObj => Object.values(resObj)[0]);
-//   return res.json({ students: responseStudents });
-// };
+const commonStudents = async (req, res, next) => {
+  let queryTeachers = req.query.teacher;
+  queryTeachers =
+    queryTeachers.constructor === Array ? queryTeachers : [queryTeachers];
+  const indexesTeachers = await Promise.all(
+    queryTeachers.map(async teacher => await Teacher.getIdByEmail(teacher))
+  );
+  const response = await database.query(commonStudentsQuery(indexesTeachers));
+  const responseStudents = response.map(resObj => Object.values(resObj)[0]);
+  return res.json({ students: responseStudents });
+};
 
 // const suspend = async (req, res, next) => {
 //   const studentToSuspend = req.body.student;
@@ -153,8 +133,8 @@ const register = async (req, res, next) => {
 module.exports = {
   teachers,
   students,
-  register
-  // commonStudents,
+  register,
+  commonStudents
   // suspend,
   // retrievefornotifications
 };

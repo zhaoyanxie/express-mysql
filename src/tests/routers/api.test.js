@@ -10,18 +10,16 @@ const {
   TABLE_TEACHERS,
   TABLE_TEACHERS_STUDENTS
 } = require("../../constants");
-const Teacher = require("../../models/Teacher");
-const Student = require("../../models/Student");
+const { Teacher, Student, TeacherStudent } = require("../../models");
 
 const app = express();
 
 apiRouter(app);
 describe("api router test", () => {
   const userDoesNotExist = "doesnotexist@email.com";
-  const studentHon = "studenthon@example.com";
-  const studentJon = "studentjon@example.com";
+  const studentA = "studentA@email.com";
+  const studentB = "studentB@example.com";
   const teacherJim = "teacherjim@email.com";
-  const teacherKen = "teacherken@email.com";
   const teacherJoe = "teacherjoe@email.com";
 
   test("GET /api/teachers to return status 200", async () => {
@@ -32,10 +30,10 @@ describe("api router test", () => {
     const res = await request(app).get("/api/students");
     expect(res.status).toBe(200);
   });
-  test("POST /api/register to return status 400", async () => {
+  test.skip("POST /api/register to return status 400", async () => {
     const req = {
       teacher: userDoesNotExist,
-      students: [studentJon, studentHon]
+      students: [studentB, studentA]
     };
     const res = await request(app)
       .post("/api/register")
@@ -46,25 +44,35 @@ describe("api router test", () => {
     );
   });
 
-  test.skip("POST /api/register to register a student (unregistered in database) to return status 204", async () => {
+  test("POST /api/register to register a student (unregistered in database) to return status 204", async () => {
     const req = {
       teacher: teacherJim,
-      students: ["newstudent@email.com", "studentOnlyJim@email.com"]
+      students: ["newstudent@email.com", "studentnew@email.com"]
     };
-    const res = await request(app)
+    await request(app)
       .post("/api/register")
       .send(req);
-    const allStudents = await request(app).get("/api/students");
-    const newStudent = allStudents.body.filter(s =>
-      s.email.includes("newstudent")
-    )[0];
-    expect(res.status).toBe(204);
-    expect(newStudent.email).toBe(req.students[0]);
+    const idStudent1 = await Student.getIdByEmail(req.students[0]);
+    const idStudent2 = await Student.getIdByEmail(req.students[1]);
+    const idTeacherJim = await Teacher.getIdByEmail(req.teacherJim);
+    const allTeacherStudent = await TeacherStudent.getAll();
+    expect(idStudent1).toBeGreaterThan(0);
+    expect(idStudent2).toBeGreaterThan(0);
+    expect(
+      allTeacherStudent.find(
+        ele => ele.student_id === idStudent1 && ele.teacher_id === idTeacherJim
+      )
+    ).toBeTruthy;
+    expect(
+      allTeacherStudent.find(
+        ele => ele.student_id === idStudent2 && ele.teacher_id === idTeacherJim
+      )
+    ).toBeTruthy;
   });
 
-  test.skip("GET /api/commonstudents to return 'newstudent@email.com' for Teachers Ken and Jim", async () => {
+  test.skip("GET /api/commonstudents to return 'newstudent@email.com' for Teachers Joe and Jim", async () => {
     const query = {
-      teacher: [teacherKen, teacherJoe]
+      teacher: [teacherJim, teacherJoe]
     };
     const res = await request(app)
       .get("/api/commonStudents")
@@ -74,7 +82,7 @@ describe("api router test", () => {
   });
   test.skip("POST /api/suspend to suspend a student and return status 204", async () => {
     const reqRegister = {
-      teacher: teacherKen,
+      teacher: teacherJim,
       students: ["suspendedstudent@email.com"]
     };
     const reqSuspend = {

@@ -12,7 +12,7 @@ exports.getAll = async () => {
 
 exports.getIdByEmail = async getTeacher => {
   const id = await getIdByEmail(TABLE_TEACHERS, getTeacher);
-  return !id ? -1 : id;
+  return id;
 };
 
 exports.getEmailById = async getTeacher => {

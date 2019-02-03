@@ -1,29 +1,15 @@
 require("dotenv").config();
 const database = require("./database");
-
+const { asyncForEach } = require("./utils/asyncForEach");
 const {
+  TEACHERS,
+  STUDENTS,
   TABLE_TEACHERS,
   TABLE_STUDENTS,
   TABLE_TEACHERS_STUDENTS
 } = require("./constants");
 const { Teacher, Student, TeacherStudent } = require("./models");
 
-const TEACHERS = [
-  { email: "teacherjim@email.com" },
-  { email: "teacherjoe@email.com" }
-];
-
-const STUDENTS = [
-  { email: "studentOnlyJim@email.com" },
-  { email: "studentJimAndJoe@email.com" },
-  { email: "studentOnlyJoe@email.com" }
-];
-
-const asyncForEach = async (arr, cb) => {
-  for (let index = 0; index < arr.length; index++) {
-    await cb(arr[index], index, arr);
-  }
-};
 const setupTestDB = async () => {
   await database.dropTable(TABLE_TEACHERS_STUDENTS);
   await database.dropTable(TABLE_TEACHERS);
