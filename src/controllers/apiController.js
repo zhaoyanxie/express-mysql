@@ -1,10 +1,4 @@
-const database = require("../database");
 const { asyncForEach } = require("../utils/asyncForEach");
-const {
-  TABLE_STUDENTS,
-  TABLE_TEACHERS,
-  TABLE_TEACHERS_STUDENTS
-} = require("../constants");
 const { Teacher, Student, TeacherStudent } = require("../models");
 
 const teachers = async (req, res, next) => {
@@ -17,34 +11,32 @@ const students = async (req, res, next) => {
   res.status(200).json(allStudents);
 };
 
-// ERROR-HANDLING:
-const checkTeacherExist = (res, next, indexTeacher, teacherEmail) => {
-  if (indexTeacher < 0) {
-    return res
-      .status(400)
-      .json({ message: `Teacher ${teacherEmail} does not exist.` });
-  }
-  next();
-};
-
 const register = async (req, res, next) => {
-  const { body } = req;
-  const { teacher, students } = body;
-  let idStudent;
-  const idTeacher = await Teacher.getIdByEmail(teacher); // from db
-  checkTeacherExist(res, next, idTeacher, teacher);
+  try {
+    const { body } = req;
+    const { teacher, students } = body;
+    let idStudent;
+    const idTeacher = await Teacher.getIdByEmail(teacher); // from db
 
-  asyncForEach(students, async student => {
-    idStudent = await Student.getIdByEmail(student);
-
-    if (idStudent < 0) {
-      await Student.insert(student);
-      idStudent = await Student.getIdByEmail(student);
+    if (idTeacher < 0) {
+      const error = new Error(`Teacher ${teacher} does not exist.`);
+      error.name = "UserError";
+      return next(error);
     }
-    await TeacherStudent.insert(idTeacher, idStudent);
-  });
 
-  return res.status(201).json({ message: "registered" });
+    asyncForEach(students, async student => {
+      idStudent = await Student.getIdByEmail(student);
+
+      if (idStudent < 0) {
+        await Student.insert(student);
+        idStudent = await Student.getIdByEmail(student);
+      }
+      await TeacherStudent.insert(idTeacher, idStudent);
+    });
+    res.status(201).json({ message: "registered" });
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 const commonStudents = async (req, res, next) => {
@@ -53,7 +45,7 @@ const commonStudents = async (req, res, next) => {
     queryTeachers.constructor === Array ? queryTeachers : [queryTeachers];
   const commonStudents = await TeacherStudent.getCommonStudents(queryTeachers);
   const commonStudentsEmail = commonStudents.map(s => s.email);
-  return res.json({ students: commonStudentsEmail });
+  res.json({ students: commonStudentsEmail });
 };
 
 const suspend = async (req, res, next) => {
@@ -73,9 +65,12 @@ const suspend = async (req, res, next) => {
 const retrieveForNotifications = async (req, res, next) => {
   const { teacher, notification } = req.body;
   // TODO: Error handling
-  // const idTeacher = await Teacher.getIdByEmail(teacher);
-  // checkTeacherExist(res, next, idTeacher, teacher);
-
+  const indexTeacher = await Teacher.getIdByEmail(teacher);
+  if (indexTeacher < 0) {
+    const error = new Error(`Teacher ${teacher} does not exist.`);
+    error.name = "UserError";
+    return next(error);
+  }
   // Get students registered under a teacher by id
   const studentsOfTeacher = await TeacherStudent.getCommonStudents([teacher]);
   // Filter students not suspended

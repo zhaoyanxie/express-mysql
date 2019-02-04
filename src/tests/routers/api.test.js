@@ -30,7 +30,7 @@ describe("api router test", () => {
     const res = await request(app).get("/api/students");
     expect(res.status).toBe(200);
   });
-  test.skip("POST /api/register to return status 400", async () => {
+  test("POST /api/register to return status 400", async () => {
     const req = {
       teacher: userDoesNotExist,
       students: [studentB, studentA]
@@ -39,9 +39,6 @@ describe("api router test", () => {
       .post("/api/register")
       .send(req);
     expect(res.status).toBe(400);
-    expect(res.body.message).toBe(
-      `Teacher ${userDoesNotExist} does not exist.`
-    );
   });
 
   test("POST /api/register to register a student (unregistered in database) to return status 204", async () => {
@@ -110,7 +107,7 @@ describe("api router test", () => {
     expect(res.status).toBe(400);
     expect(res.body.message).toBe(`Student ${userDoesNotExist} does not exist`);
   });
-  test.skip("POST /api/retrievefornotifications to return status 400 for teacher does not exist", async () => {
+  test("POST /api/retrievefornotifications to return status 400 for teacher does not exist", async () => {
     const req = {
       teacher: userDoesNotExist,
       notification:
@@ -120,9 +117,6 @@ describe("api router test", () => {
       .post("/api/retrievefornotifications")
       .send(req);
     expect(res.status).toBe(400);
-    expect(res.body.message).toEqual(
-      `Teacher ${userDoesNotExist} does not exist.`
-    );
   });
   test("POST /api/retrievefornotifications to return list of students for notification", async () => {
     const req = {

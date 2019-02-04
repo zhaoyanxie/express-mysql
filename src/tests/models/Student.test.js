@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const Student = require("../../models/Student");
-const { TABLE_STUDENTS, TEACHERS } = require("../../constants");
+const { TABLE_STUDENTS } = require("../../constants");
 
 describe("Student model test", () => {
   const allStudents = [];
@@ -37,9 +37,4 @@ describe("Student model test", () => {
     const resStudent1 = await Student.getStudentByEmail(student1);
     expect(resStudent1[0].is_suspended).toBe(1);
   });
-  // test("getStudentsOfTeacherByEmail should return all non suspended students of a teacher", async () => {
-  //   const teacherEmail = TEACHERS[0].email
-  //   const students = await Student.getStudentsOfTeacherByEmail(teacherEmail, 0);
-  //   expect(students)
-  // })
 });

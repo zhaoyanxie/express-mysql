@@ -4,27 +4,19 @@ const router = express.Router();
 router.use(express.json());
 
 const apiController = require("../controllers/apiController");
+const { asyncErrorHandler } = require("../middlewares/asyncErrorHandler");
+const { error400sHandler } = require("../middlewares/errorHandler");
 
-// GET: all teachers
-router.get("/teachers", apiController.teachers);
-// GET: all students
-router.get("/students", apiController.students);
-// POST: register a student to a teacher
-router.post("/register", apiController.register);
-router.post("/try", (req, res, next) => {
-  console.log(req.body);
-  res.status(201).json({ message: "ok" });
-});
-// GET: common students to array of teachers
-router.get("/commonstudents", apiController.commonStudents);
-// POST: suspend student
-router.post("/suspend", apiController.suspend);
-// POST: send notification to student
+router.get("/teachers", asyncErrorHandler(apiController.teachers));
+router.get("/students", asyncErrorHandler(apiController.students));
+router.post("/register", asyncErrorHandler(apiController.register));
+router.get("/commonstudents", asyncErrorHandler(apiController.commonStudents));
+router.post("/suspend", asyncErrorHandler(apiController.suspend));
 router.post(
   "/retrievefornotifications",
-  apiController.retrieveForNotifications
+  asyncErrorHandler(apiController.retrieveForNotifications)
 );
 
 module.exports = app => {
-  app.use("/api", router);
+  app.use("/api", router, error400sHandler);
 };
