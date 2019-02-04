@@ -15,7 +15,7 @@ exports.getAll = async () => {
 };
 
 const commonStudentsQuery = indexesTeachers => {
-  let querySelect = `SELECT DISTINCT email FROM ${TABLE_STUDENTS} t `;
+  let querySelect = `SELECT DISTINCT * FROM ${TABLE_STUDENTS} t `;
   let queryInnerJoin = `INNER JOIN ${TABLE_TEACHERS_STUDENTS} t0 ON t.id = t0.student_id `;
   let queryWhere = `WHERE t0.teacher_id = ${indexesTeachers[0]} `;
 
@@ -33,6 +33,7 @@ exports.getCommonStudents = async teachersEmailArr => {
     teachersEmailArr.map(async teacher => await Teacher.getIdByEmail(teacher))
   );
   const response = await database.query(commonStudentsQuery(indexesTeachers));
-  const responseStudents = response.map(resObj => Object.values(resObj)[0]);
-  return responseStudents;
+  // const responseStudents = response.map(resObj => Object.values(resObj)[0]);
+  // console.log("response", responseStudents);
+  return response;
 };

@@ -20,10 +20,10 @@ router.get("/commonstudents", apiController.commonStudents);
 // POST: suspend student
 router.post("/suspend", apiController.suspend);
 // POST: send notification to student
-// router.post(
-//   "/retrievefornotifications",
-//   apiController.retrievefornotifications
-// );
+router.post(
+  "/retrievefornotifications",
+  apiController.retrieveForNotifications
+);
 
 module.exports = app => {
   app.use("/api", router);

@@ -23,7 +23,9 @@ describe("TeacherStudent model test", () => {
       teacherEmailArr
     );
     expect(
-      commonStudents.find(student => student.includes(STUDENTS[1].email >= 0))
+      commonStudents.find(student =>
+        student.email.includes(STUDENTS[1].email >= 0)
+      )
     ).toBeTruthy;
   });
 });

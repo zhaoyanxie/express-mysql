@@ -30,7 +30,7 @@ exports.suspend = async studentEmail => {
     studentEmail
   );
 
-  exports.getStudent = async studentEmail => {
+  exports.getStudentByEmail = async studentEmail => {
     const queryStr = `SELECT * FROM ${TABLE_STUDENTS} WHERE email = '${studentEmail}'`;
     return await database.query(queryStr);
   };

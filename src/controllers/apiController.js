@@ -52,7 +52,8 @@ const commonStudents = async (req, res, next) => {
   queryTeachers =
     queryTeachers.constructor === Array ? queryTeachers : [queryTeachers];
   const commonStudents = await TeacherStudent.getCommonStudents(queryTeachers);
-  return res.json({ students: commonStudents });
+  const commonStudentsEmail = commonStudents.map(s => s.email);
+  return res.json({ students: commonStudentsEmail });
 };
 
 const suspend = async (req, res, next) => {
@@ -69,47 +70,33 @@ const suspend = async (req, res, next) => {
   res.status(204).json({ message: "suspend" });
 };
 
-// const retrievefornotifications = async (req, res, next) => {
-//   const { teacher, notification } = req.body;
-//   // Criteria 1: must not be suspended
-//   const criteria1 = "isSuspended = 0";
-//   const queryStr = `SELECT (email), (teachers_id) FROM ${TABLE_STUDENTS} WHERE ${criteria1}`;
-//   const studentsNotSuspended = await database.query(queryStr);
-//   // console.log("results", studentsNotSuspended);
+const retrieveForNotifications = async (req, res, next) => {
+  const { teacher, notification } = req.body;
+  // TODO: Error handling
+  // const idTeacher = await Teacher.getIdByEmail(teacher);
+  // checkTeacherExist(res, next, idTeacher, teacher);
 
-//   // Criteria 2: registered with teacher OR mentioned notification
-//   // filter out students registered with teacher
-//   const teacherIndex = await getTeacherIndex(teacher);
-//   // ERROR-HANDLING: Check if teacher exists, exit if doesn't
-//   if (teacherIndex < 0) {
-//     return res
-//       .status(400)
-//       .json({ message: `Teacher ${teacher} does not exist.` });
-//   }
-//   const notificationList = studentsNotSuspended
-//     .filter(student => {
-//       const teachers_id = student.teachers_id || "";
-//       const teachers_idArr = teachers_id.split(",").map(id => parseInt(id));
-//       return teachers_idArr.indexOf(teacherIndex) >= 0;
-//     })
-//     .map(student => student.email);
+  // Get students registered under a teacher by id
+  const studentsOfTeacher = await TeacherStudent.getCommonStudents([teacher]);
+  // Filter students not suspended
+  const studentsNotSuspended = studentsOfTeacher
+    .filter(s => !s.is_suspended)
+    .map(s => s.email);
 
-//   // add to to notification list those mentioned
-//   const mentionedStudents = notification
-//     .match(/(?=[\ @])[^\s]+/g)
-//     .map(string => string.substr(1));
-//   mentionedStudents.forEach(mentionedStudent => {
-//     if (notificationList.indexOf(mentionedStudent) < 0) {
-//       notificationList.push(mentionedStudent);
-//     }
-//   });
-//   res.status(200).json({ recipients: notificationList });
-// };
+  const mentionedStudents = notification
+    .match(/(?=[\ @])[^\s]+/g)
+    .map(string => string.substr(1));
+  const notificationList = studentsNotSuspended
+    .concat(mentionedStudents)
+    .sort();
+  res.status(200).json({ recipients: notificationList });
+};
+
 module.exports = {
   teachers,
   students,
   register,
   commonStudents,
-  suspend
-  // retrievefornotifications
+  suspend,
+  retrieveForNotifications
 };

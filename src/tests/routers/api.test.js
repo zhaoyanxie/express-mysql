@@ -95,7 +95,7 @@ describe("api router test", () => {
     const res = await request(app)
       .post("/api/suspend")
       .send(reqSuspend);
-    const queryStudent = await Student.getStudent(reqSuspend.student);
+    const queryStudent = await Student.getStudentByEmail(reqSuspend.student);
     expect(res.status).toBe(204);
     expect(queryStudent[0].is_suspended).toBe(1);
   });
@@ -124,9 +124,9 @@ describe("api router test", () => {
       `Teacher ${userDoesNotExist} does not exist.`
     );
   });
-  test.skip("POST /api/retrievefornotifications to return list of students for notification", async () => {
+  test("POST /api/retrievefornotifications to return list of students for notification", async () => {
     const req = {
-      teacher: teacherKen,
+      teacher: teacherJim,
       notification:
         "Hello students! @studentagnes@example.com @studentmiche@example.com"
     };
@@ -134,11 +134,13 @@ describe("api router test", () => {
       .post("/api/retrievefornotifications")
       .send(req);
     const expectedNotificationList = [
-      "studentagnes@example.com",
+      "studentJimAndJoe@email.com",
       "newstudent@email.com",
+      "studentnew@email.com",
+      "studentagnes@example.com",
       "studentmiche@example.com"
     ];
     expect(res.status).toBe(200);
-    expect(res.body.recipients.sort()).toEqual(expectedNotificationList.sort());
+    expect(res.body.recipients).toEqual(expectedNotificationList.sort());
   });
 });
