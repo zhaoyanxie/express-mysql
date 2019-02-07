@@ -64,7 +64,6 @@ const suspend = async (req, res, next) => {
 
 const retrieveForNotifications = async (req, res, next) => {
   const { teacher, notification } = req.body;
-  // TODO: Error handling
   const indexTeacher = await Teacher.getIdByEmail(teacher);
   if (indexTeacher < 0) {
     const error = new Error(`Teacher ${teacher} does not exist.`);
@@ -83,6 +82,7 @@ const retrieveForNotifications = async (req, res, next) => {
     .map(string => string.substr(1));
   const notificationList = studentsNotSuspended
     .concat(mentionedStudents)
+    .filter((student, i, arr) => arr.indexOf(student) === i)
     .sort();
   res.status(200).json({ recipients: notificationList });
 };

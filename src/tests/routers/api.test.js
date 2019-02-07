@@ -122,7 +122,7 @@ describe("api router test", () => {
     const req = {
       teacher: teacherJim,
       notification:
-        "Hello students! @studentagnes@example.com @studentmiche@example.com"
+        "Hello students! @studentagnes@example.com @studentmiche@example.com @newstudent@email.com"
     };
     const res = await request(app)
       .post("/api/retrievefornotifications")
